@@ -39,18 +39,18 @@ download http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2 ffmpeg-$FFMPE
 mkdir -p $PLATFORM
 cd $PLATFORM
 INSTALL_PATH=`pwd`
-#tar -xzvf ../$ZLIB.tar.gz
-#tar -xzvf ../$LAME.tar.gz
-#wget -O lame-3.99.5/config.guess "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD"
-#tar -xzvf ../$SPEEX.tar.gz
-#tar -xzvf ../$OPENCORE_AMR.tar.gz
-#tar -xzvf ../$OPENSSL.tar.gz
-#tar -xzvf ../openh264-$OPENH264_VERSION.tar.gz
-#tar -xjvf ../last_stable_x264.tar.bz2
-#tar -xzvf ../$X265.tar.gz
-#mkdir -p libvpx-$VPX_VERSION
-#tar -xzvf ../libvpx-$VPX_VERSION.tar.gz -C libvpx-$VPX_VERSION
-#tar -xjvf ../ffmpeg-$FFMPEG_VERSION.tar.bz2
+tar -xzvf ../$ZLIB.tar.gz
+tar -xzvf ../$LAME.tar.gz
+wget -O lame-3.99.5/config.guess "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD"
+tar -xzvf ../$SPEEX.tar.gz
+tar -xzvf ../$OPENCORE_AMR.tar.gz
+tar -xzvf ../$OPENSSL.tar.gz
+tar -xzvf ../openh264-$OPENH264_VERSION.tar.gz
+tar -xjvf ../last_stable_x264.tar.bz2
+tar -xzvf ../$X265.tar.gz
+mkdir -p libvpx-$VPX_VERSION
+tar -xzvf ../libvpx-$VPX_VERSION.tar.gz -C libvpx-$VPX_VERSION
+tar -xjvf ../ffmpeg-$FFMPEG_VERSION.tar.bz2
 X264=`echo x264-snapshot-*`
 
 case $PLATFORM in

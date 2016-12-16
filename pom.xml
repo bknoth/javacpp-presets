@@ -79,7 +79,7 @@
     <repository>
       <id>sonatype-nexus-staging</id>
       <name>Sonatype Nexus Staging</name>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <url>http://ec2-54-224-85-46.compute-1.amazonaws.com:8081/content/repositories/releases</url>
     </repository>
   </distributionManagement>
 
@@ -356,10 +356,10 @@
         <artifactId>maven-deploy-plugin</artifactId>
         <version>2.8.2</version>
         <configuration>
-          <skip>true</skip>
+          <skip>false</skip>
         </configuration>
       </plugin>
-      <plugin>
+      <!-- plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
         <version>1.6.6</version>
@@ -378,7 +378,7 @@
           <nexusUrl>https://oss.sonatype.org/</nexusUrl>
           <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
         </configuration>
-      </plugin>
+      </plugin -->
     </plugins>
   </build>
 
