@@ -13,7 +13,7 @@ if [[ $PLATFORM == windows* ]]; then
 else
     mkdir -p $PLATFORM
     cd $PLATFORM
-    cp -r /home/mosaiq/src/cpp/eventdetect/* .
+    cp -r ../../src/main/cpp/* .
     chmod +x build.sh
 fi
 
