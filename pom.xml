@@ -58,6 +58,7 @@
     <module>cuda</module>
     <module>mxnet</module>
     <module>tensorflow</module>
+    <module>eventdetect</module>
   </modules>
 
   <prerequisites>
