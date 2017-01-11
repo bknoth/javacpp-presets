@@ -14,12 +14,12 @@ else
     mkdir -p $PLATFORM
     cd $PLATFORM
     cp -r ../../src/main/cpp/* .
-    chmod +x build.sh
+    chmod +x build-all-thread.sh
 fi
 
 case $PLATFORM in
     linux-x86_64)
-        ./build.sh
+        ./build-all-thread.sh
 	sudo mkdir -p /usr/local/include/eventdetect
 	sudo mkdir -p /usr/local/lib/eventdetect
 	sudo cp *.h /usr/local/include/eventdetect
