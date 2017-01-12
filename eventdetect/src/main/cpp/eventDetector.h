@@ -13,6 +13,7 @@ public:
         ~ED() {};
 
 	int detectEvent( std::vector<Mat> &frames);
+        int detectFromFile(string filename);
 };
 
 #endif

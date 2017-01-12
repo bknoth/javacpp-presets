@@ -17,6 +17,10 @@
 
 //#define DEBUG
 
+// Max number of frames to be read.
+#define MAX_FRAMES 500
+
+
 // Minimum blob size for detection
 #define MIN_BLOB_SIZE 200
 
@@ -187,6 +191,22 @@ int processFrames( std::vector<Mat> &frames)
 }
 
 int ED::detectEvent( std::vector<Mat> &frames) { 
+  return processFrames(frames); 
+}
+
+int ED::detectFromFile(string filename) {
+  VideoCapture cap(filename);
+  std::vector<Mat> frames;
+  int numFrames = 0;
+  while(1)
+  {
+    Mat frame;
+    cap >> frame;
+    if (frame.empty()) break;
+    frames.push_back(frame);
+    numFrames++;
+    if (numFrames == MAX_FRAMES) break;
+  }
   return processFrames(frames); 
 }
 

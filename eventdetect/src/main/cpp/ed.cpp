@@ -70,11 +70,30 @@ int main(int argc, char** argv)
 
     int numT = 100;
     while (numT > 0) {
-       new thread(processVideoFile, input);
+       thread t1(processVideoFile, input);
+       thread t2(processVideoFile, input);
+       thread t3(processVideoFile, input);
+       thread t4(processVideoFile, input);
+       thread t5(processVideoFile, input);
+       thread t6(processVideoFile, input);
+       thread t7(processVideoFile, input);
+       thread t8(processVideoFile, input);
+       thread t9(processVideoFile, input);
+       thread t10(processVideoFile, input);
+
+       t1.join();
+       t2.join();
+       t3.join();
+       t4.join();
+       t5.join();
+       t6.join();
+       t7.join();
+       t8.join();
+       t9.join();
+       t10.join();
+
        numT--;
     }
-
-    usleep(999999999);
 
     exit(0);
 }
