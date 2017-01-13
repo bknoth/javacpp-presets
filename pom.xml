@@ -59,6 +59,7 @@
     <module>mxnet</module>
     <module>tensorflow</module>
     <module>eventdetect</module>
+    <module>videohelper</module>
   </modules>
 
   <prerequisites>
