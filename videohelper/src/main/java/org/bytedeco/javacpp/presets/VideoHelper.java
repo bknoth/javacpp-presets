@@ -6,7 +6,7 @@ import org.bytedeco.javacpp.tools.*;
 @Properties(target="org.bytedeco.javacpp.videohelper", value={
     @Platform(value="linux", include="videoHelper.h", link="vh", includepath = "/usr/local/include/videohelper/", linkpath = "/usr/local/lib/videohelper/" )
 }, inherit = opencv_imgproc.class)
-public class ED implements InfoMapper {
+public class VideoHelper implements InfoMapper {
     public void map(InfoMap infoMap) {
         infoMap.put(new Info("FAR").cppText("#define FAR"))
                .put(new Info("OF").cppText("#define OF(args) args"))

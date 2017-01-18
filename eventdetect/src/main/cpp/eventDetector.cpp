@@ -195,6 +195,7 @@ int ED::detectEvent( std::vector<Mat> &frames) {
 }
 
 int ED::detectFromFile(string filename) {
+  cout << "Detecting events from file: [" << filename << "]" << endl;
   VideoCapture cap(filename);
   std::vector<Mat> frames;
   int numFrames = 0;

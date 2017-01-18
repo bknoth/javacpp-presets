@@ -24,6 +24,12 @@ int VideoHelper::downSample(string src, string dest, int rate) {
   int srcRate = (int) cap.get(CV_CAP_PROP_FPS);
   int destRate = rate;
   if (srcRate < destRate) destRate = srcRate;
+
+  if (destRate <= 0) {
+    cout << "ERROR: Destination FPS is 0" << endl;
+    return 0;
+  }
+  
   int frameSkip = (int)(srcRate / destRate);
 
   cout << "Src FPS : " << srcRate << endl;

@@ -35,6 +35,8 @@ public static class ED extends Pointer {
         private native void allocate();
 
 	public native int detectEvent( @ByRef MatVector frames);
+        public native int detectFromFile(@StdString BytePointer filename);
+        public native int detectFromFile(@StdString String filename);
 }
 
 // #endif

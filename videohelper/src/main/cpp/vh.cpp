@@ -5,6 +5,7 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/videoio.hpp"
 #include "opencv2/highgui.hpp"
+#include "json/json.h"
 #include <thread>
 #include <stdio.h>
 #include <iostream>
@@ -28,7 +29,6 @@ void processVideoFile(string filename)
 
 int main(int argc, char** argv)
 {
-
     // Parse command line arguments
     CommandLineParser parser(argc, argv, "{help h||}{@input||}");
     if (parser.has("help"))
@@ -44,8 +44,21 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    thread t1(processVideoFile, input);
-    t1.join();
+    Json::Value root;
+    string inJson = input;
+    cout << "Input: " << inJson << endl;
+    std::istringstream iss (inJson);
+    iss >> root;
+
+    Json::Value files = root["files"];
+    for ( int index = 0; index < files.size(); ++index ) {
+      Json::Value data = files[index];
+      string filename = data.get("name","NO_FILE_GIVEN").asString();
+      int value = data.get("val",0).asInt();
+      std:cout << "Json: filename:" << filename << " value:" << value << endl;
+      thread t1(processVideoFile, filename);
+      t1.join();
+    }
 
     exit(0);
 }

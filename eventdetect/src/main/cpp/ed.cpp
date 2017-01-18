@@ -30,22 +30,8 @@ static void help()
 
 void processVideoFile(string filename)
 {
-  cout << "Processing : " << filename << endl;
-  VideoCapture cap(filename);
-  std::vector<Mat> frames;
-  int numFrames = 0;
-  while(1)
-  {
-    //cout << "Frame : " << numFrames << endl;
-    Mat frame;
-    cap >> frame;
-    if (frame.empty()) break;
-    frames.push_back(frame);
-    numFrames++;
-    if (numFrames == MAX_FRAMES) break;
-  }
   ED ed;
-  ed.detectEvent(frames);
+  ed.detectFromFile(filename);
 }
 
 int main(int argc, char** argv)

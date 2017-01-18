@@ -1,3 +1,3 @@
-g++ -c  videoHelper.cpp -fpic -std=c++0x -pthread `pkg-config --cflags --libs ../../../opencv/cppbuild/linux-x86_64/opencv-3.1.0/unix-install/opencv.pc` -L../../../opencv/cppbuild/linux-x86_64/share/OpenCV/3rdparty/lib
-g++ -shared -o libvh.so videoHelper.o  -std=c++0x -pthread `pkg-config --cflags --libs ../../../opencv/cppbuild/linux-x86_64/opencv-3.1.0/unix-install/opencv.pc` -L../../../opencv/cppbuild/linux-x86_64/share/OpenCV/3rdparty/lib
+g++ -c  videoHelper.cpp jsoncpp.cpp -fpic -std=c++0x -pthread `pkg-config --cflags --libs ../../../opencv/cppbuild/linux-x86_64/opencv-3.1.0/unix-install/opencv.pc` -L../../../opencv/cppbuild/linux-x86_64/share/OpenCV/3rdparty/lib
+g++ -shared -o libvh.so videoHelper.o jsoncpp.o  -std=c++0x -pthread `pkg-config --cflags --libs ../../../opencv/cppbuild/linux-x86_64/opencv-3.1.0/unix-install/opencv.pc` -L../../../opencv/cppbuild/linux-x86_64/share/OpenCV/3rdparty/lib
 g++ -o bin/vh vh.cpp -ggdb -std=c++0x -pthread `pkg-config --cflags --libs ../../../opencv/cppbuild/linux-x86_64/opencv-3.1.0/unix-install/opencv.pc`  -L./ -L../../../opencv/cppbuild/linux-x86_64/share/OpenCV/3rdparty/lib -lvh
