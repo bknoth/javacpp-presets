@@ -15,6 +15,7 @@ else
     cd $PLATFORM
     cp -r ../../src/main/cpp/* .
     chmod +x build-all-thread.sh
+    mkdir -p bin
 fi
 
 case $PLATFORM in
