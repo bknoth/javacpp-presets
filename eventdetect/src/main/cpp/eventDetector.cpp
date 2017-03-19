@@ -16,6 +16,8 @@
 
 
 //#define DEBUG
+//#define DEBUG_BACKGROUND
+//#define DEBUG_DUMP_OUT_VIDEO
 
 // Max number of frames to be read.
 #define MAX_FRAMES 500
@@ -92,7 +94,7 @@ static void getBoundingBoxes(const Mat& img, Mat& mask, std::vector<cv::Rect> &b
 
 }
 
-int processFrames( std::vector<Mat> &frames)
+int processFrames( std::vector<Mat> &frames, int initialFrameRate )
 {
   int countFramesWithBboxes = 0;
   bool updateBackgroundModel = true;
@@ -123,15 +125,23 @@ int processFrames( std::vector<Mat> &frames)
   #ifdef DEBUG
     // Get character code for codec
     namedWindow("video", 1);
+  #endif
 
+  #ifdef DEBUG_BACKGROUND
     // Show background
     Mat bkgnd;
     bgsubtractor->getBackgroundImage(bkgnd);
     imshow("Background", bkgnd);
-    waitKey(0);
+    waitKey(1);
   #endif /* DEBUG */
-
-
+ 
+  #ifdef DEBUG_DUMP_OUT_VIDEO
+     VideoWriter vidOut("./video-out.mp4", VideoWriter::fourcc('X','2','6','4'), initialFrameRate, frame.size(), true);
+     if (!vidOut.isOpened()) {
+       cout << "ERROR: Could not open output video file" << endl;
+       return 0;
+     }
+  #endif
 
   // Vector of motion bounding boxes
   std::vector<cv::Rect> bboxes;
@@ -165,6 +175,16 @@ int processFrames( std::vector<Mat> &frames)
         return TERMINATION_THRESHOLD;
       }
 
+#ifdef DEBUG_DUMP_OUT_VIDEO
+      outFrame = frame;
+
+      for (int j = 0; j < bboxes.size(); j++)
+      {
+          rectangle( outFrame, bboxes[j].tl(), bboxes[j].br(), Scalar(255,255,255), 2, 8, 0 );
+      }
+      vidOut << outFrame;
+#endif
+
 #ifdef DEBUG
       outFrame = frame;
 
@@ -182,16 +202,24 @@ int processFrames( std::vector<Mat> &frames)
           updateBackgroundModel = !updateBackgroundModel;
           printf("Learn background is in state = %d\n",updateBackgroundModel);
       }
+
+      waitKey(5000);
+	
 #endif /* DEBUG */
 
   }
   cout << "Total frames: " << frames.size() << endl << "Total frames having motion: " << countFramesWithBboxes << endl;
+
+#ifdef DEBUG_DUMP_OUT_VIDEO
+  vidOut.release();
+#endif
+
   return countFramesWithBboxes;
 
 }
 
 int ED::detectEvent( std::vector<Mat> &frames) { 
-  return processFrames(frames); 
+  return processFrames(frames, 5); 
 }
 
 int ED::detectFromFile(string filename) {
@@ -208,6 +236,48 @@ int ED::detectFromFile(string filename) {
     numFrames++;
     if (numFrames == MAX_FRAMES) break;
   }
-  return processFrames(frames); 
+  return processFrames(frames,(int) cap.get(CV_CAP_PROP_FPS));
+}
+
+int ED::detectFromFileWithMask(string filename, string maskfilename) {
+  cout << "Detecting events from file: [" << filename << "] with mask [" << maskfilename << "]" << endl;
+
+  Mat mask = imread(maskfilename, 0);
+  if (!mask.data) {
+    cout << "ERROR: Bad mask [" << maskfilename << "]" << endl;
+    return -1;
+  }
+  else {
+    // Need to invert the mask
+    for( int y = 0; y < mask.rows; y++ ) {
+      for( int x = 0; x < mask.cols; x++ ) {
+        if (mask.at<uchar>(y,x) == 0) mask.at<uchar>(y,x) = 1; else mask.at<uchar>(y,x) = 0;
+      }
+    }
+  }
+
+  VideoCapture cap(filename);
+  std::vector<Mat> frames;
+  int numFrames = 0;
+  while(1)
+  {
+    Mat frame;
+    cap >> frame;
+    if (frame.empty()) break;
+
+    // Here we make sure the mask is the same size as the frame
+    Mat properMask;
+    resize(mask, properMask, frame.size());
+
+    // Now we mask the frame
+    Mat maskedFrame;
+    frame.copyTo(maskedFrame,properMask);
+
+    frames.push_back(maskedFrame);
+    numFrames++;
+    if (numFrames == MAX_FRAMES) break;
+  }
+
+  return processFrames(frames,(int) cap.get(CV_CAP_PROP_FPS));
 }
 

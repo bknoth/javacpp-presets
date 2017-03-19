@@ -34,19 +34,24 @@ void processVideoFile(string filename)
   ed.detectFromFile(filename);
 }
 
+void processVideoFileWithMask(string filename, string maskfilename)
+{
+  ED ed;
+  ed.detectFromFileWithMask(filename, maskfilename);
+}
+
 int main(int argc, char** argv)
 {
 
     // Parse command line arguments
-    CommandLineParser parser(argc, argv, "{help h||}{@input||}");
+    CommandLineParser parser(argc, argv, "{help h||}{@arg1||}{@arg2||}");
     if (parser.has("help"))
     {
         help();
         return 0;
     }
-    string input = parser.get<std::string>("@input");
-
-
+    string input = parser.get<std::string>(0);
+    string mask = parser.get<std::string>(1);
 
     if (input.empty())
     {
@@ -54,8 +59,10 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    int numT = 100;
-    while (numT > 0) {
+    bool testMultiThread = false;
+    if (testMultiThread) {
+      int numT = 100;
+      while (numT > 0) {
        thread t1(processVideoFile, input);
        thread t2(processVideoFile, input);
        thread t3(processVideoFile, input);
@@ -79,6 +86,15 @@ int main(int argc, char** argv)
        t10.join();
 
        numT--;
+      }
+    }
+    else {
+      if (mask.empty()) {
+         processVideoFile(input);
+      }
+      else {
+         processVideoFileWithMask(input,mask);
+      }
     }
 
     exit(0);

@@ -14,6 +14,7 @@ public:
 
 	int detectEvent( std::vector<Mat> &frames);
         int detectFromFile(string filename);
+        int detectFromFileWithMask(string filename, string maskfilename);
 };
 
 #endif
