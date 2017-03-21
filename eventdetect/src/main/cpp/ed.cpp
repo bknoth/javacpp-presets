@@ -27,17 +27,22 @@ static void help()
     cout << "Usage : " << endl << "./tracker videoFilename" << endl;
 }
 
-
-void processVideoFile(string filename)
+void processVideoFileNoSaveOutput(string filename)
 {
   ED ed;
-  ed.detectFromFile(filename);
+  ed.detectFromFile(filename, "", false);
 }
 
-void processVideoFileWithMask(string filename, string maskfilename)
+void processVideoFile(string filename, string identifier, bool saveOutput)
 {
   ED ed;
-  ed.detectFromFileWithMask(filename, maskfilename);
+  ed.detectFromFile(filename, identifier, saveOutput);
+}
+
+void processVideoFileWithMask(string filename, string maskfilename, string identifier, bool saveOutput)
+{
+  ED ed;
+  ed.detectFromFileWithMask(filename, maskfilename, identifier, saveOutput);
 }
 
 int main(int argc, char** argv)
@@ -63,16 +68,16 @@ int main(int argc, char** argv)
     if (testMultiThread) {
       int numT = 100;
       while (numT > 0) {
-       thread t1(processVideoFile, input);
-       thread t2(processVideoFile, input);
-       thread t3(processVideoFile, input);
-       thread t4(processVideoFile, input);
-       thread t5(processVideoFile, input);
-       thread t6(processVideoFile, input);
-       thread t7(processVideoFile, input);
-       thread t8(processVideoFile, input);
-       thread t9(processVideoFile, input);
-       thread t10(processVideoFile, input);
+       thread t1(processVideoFileNoSaveOutput, input);
+       thread t2(processVideoFileNoSaveOutput, input);
+       thread t3(processVideoFileNoSaveOutput, input);
+       thread t4(processVideoFileNoSaveOutput, input);
+       thread t5(processVideoFileNoSaveOutput, input);
+       thread t6(processVideoFileNoSaveOutput, input);
+       thread t7(processVideoFileNoSaveOutput, input);
+       thread t8(processVideoFileNoSaveOutput, input);
+       thread t9(processVideoFileNoSaveOutput, input);
+       thread t10(processVideoFileNoSaveOutput, input);
 
        t1.join();
        t2.join();
@@ -90,10 +95,10 @@ int main(int argc, char** argv)
     }
     else {
       if (mask.empty()) {
-         processVideoFile(input);
+         processVideoFile(input, "direct", true);
       }
       else {
-         processVideoFileWithMask(input,mask);
+         processVideoFileWithMask(input,mask,"direct", true);
       }
     }
 

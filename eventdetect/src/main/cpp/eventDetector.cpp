@@ -17,7 +17,6 @@
 
 //#define DEBUG
 //#define DEBUG_BACKGROUND
-//#define DEBUG_DUMP_OUT_VIDEO
 
 // Max number of frames to be read.
 #define MAX_FRAMES 500
@@ -94,7 +93,7 @@ static void getBoundingBoxes(const Mat& img, Mat& mask, std::vector<cv::Rect> &b
 
 }
 
-int processFrames( std::vector<Mat> &frames, int initialFrameRate )
+int processFrames( std::vector<Mat> &frames, int initialFrameRate, string identifier, bool saveOutput)
 {
   int countFramesWithBboxes = 0;
   bool updateBackgroundModel = true;
@@ -134,14 +133,22 @@ int processFrames( std::vector<Mat> &frames, int initialFrameRate )
     imshow("Background", bkgnd);
     waitKey(1);
   #endif /* DEBUG */
- 
-  #ifdef DEBUG_DUMP_OUT_VIDEO
-     VideoWriter vidOut("./video-out.mp4", VideoWriter::fourcc('X','2','6','4'), initialFrameRate, frame.size(), true);
+
+  if (saveOutput) {
+    Mat bkgnd;
+    bgsubtractor->getBackgroundImage(bkgnd);
+    imwrite("./debug/ed-" + identifier + "-bg.jpg", bkgnd);
+  }
+
+
+  VideoWriter vidOut;
+  if (saveOutput) {
+     vidOut = VideoWriter("./debug/ed-" + identifier + ".mp4", VideoWriter::fourcc('X','2','6','4'), initialFrameRate, frame.size(), true);
      if (!vidOut.isOpened()) {
        cout << "ERROR: Could not open output video file" << endl;
        return 0;
      }
-  #endif
+  }
 
   // Vector of motion bounding boxes
   std::vector<cv::Rect> bboxes;
@@ -175,15 +182,15 @@ int processFrames( std::vector<Mat> &frames, int initialFrameRate )
         return TERMINATION_THRESHOLD;
       }
 
-#ifdef DEBUG_DUMP_OUT_VIDEO
-      outFrame = frame;
+      if (saveOutput) {
+          outFrame = frame;
 
-      for (int j = 0; j < bboxes.size(); j++)
-      {
-          rectangle( outFrame, bboxes[j].tl(), bboxes[j].br(), Scalar(255,255,255), 2, 8, 0 );
+          for (int j = 0; j < bboxes.size(); j++)
+          {
+              rectangle( outFrame, bboxes[j].tl(), bboxes[j].br(), Scalar(255,255,255), 2, 8, 0 );
+          }
+          vidOut << outFrame;
       }
-      vidOut << outFrame;
-#endif
 
 #ifdef DEBUG
       outFrame = frame;
@@ -204,25 +211,25 @@ int processFrames( std::vector<Mat> &frames, int initialFrameRate )
       }
 
       waitKey(5000);
-	
+
 #endif /* DEBUG */
 
   }
   cout << "Total frames: " << frames.size() << endl << "Total frames having motion: " << countFramesWithBboxes << endl;
 
-#ifdef DEBUG_DUMP_OUT_VIDEO
-  vidOut.release();
-#endif
+  if (saveOutput) {
+    vidOut.release();
+  }
 
   return countFramesWithBboxes;
 
 }
 
-int ED::detectEvent( std::vector<Mat> &frames) { 
-  return processFrames(frames, 5); 
+int ED::detectEvent( std::vector<Mat> &frames, string identifier, bool saveOutput){
+  return processFrames(frames, 5, identifier, saveOutput);
 }
 
-int ED::detectFromFile(string filename) {
+int ED::detectFromFile(string filename, string identifier, bool saveOutput){
   cout << "Detecting events from file: [" << filename << "]" << endl;
   VideoCapture cap(filename);
   std::vector<Mat> frames;
@@ -236,10 +243,10 @@ int ED::detectFromFile(string filename) {
     numFrames++;
     if (numFrames == MAX_FRAMES) break;
   }
-  return processFrames(frames,(int) cap.get(CV_CAP_PROP_FPS));
+  return processFrames(frames,(int) cap.get(CV_CAP_PROP_FPS), identifier, saveOutput);
 }
 
-int ED::detectFromFileWithMask(string filename, string maskfilename) {
+int ED::detectFromFileWithMask(string filename, string maskfilename, string identifier, bool saveOutput) {
   cout << "Detecting events from file: [" << filename << "] with mask [" << maskfilename << "]" << endl;
 
   Mat mask = imread(maskfilename, 0);
@@ -278,6 +285,6 @@ int ED::detectFromFileWithMask(string filename, string maskfilename) {
     if (numFrames == MAX_FRAMES) break;
   }
 
-  return processFrames(frames,(int) cap.get(CV_CAP_PROP_FPS));
+  return processFrames(frames,(int) cap.get(CV_CAP_PROP_FPS), identifier, saveOutput);
 }
 

@@ -12,9 +12,9 @@ public:
         ED() {};
         ~ED() {};
 
-	int detectEvent( std::vector<Mat> &frames);
-        int detectFromFile(string filename);
-        int detectFromFileWithMask(string filename, string maskfilename);
+	int detectEvent( std::vector<Mat> &frames, string identifier, bool saveOutput);
+        int detectFromFile(string filename, string identifier, bool saveOutput);
+        int detectFromFileWithMask(string filename, string maskfilename, string identifier, bool saveOutput);
 };
 
 #endif
