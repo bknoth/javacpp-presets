@@ -27,21 +27,28 @@ void processVideoFile(string filename)
   vh.downSample(filename, "out.mp4", 5);
 }
 
-int main(int argc, char** argv)
+int processDetectROIMask(int w, int h, string roiJson, string maskFilename)
 {
-    // Parse command line arguments
+  cout << "processDetectROIMask : " << maskFilename << endl;
+  VideoHelper vh;
+  return vh.detectUnmaskedROIs(w, h, roiJson, maskFilename);
+}
+
+void downSampleTest(int argc, char** argv)
+{
+   // Parse command line arguments
     CommandLineParser parser(argc, argv, "{help h||}{@input||}");
     if (parser.has("help"))
     {
         help();
-        return 0;
+        return;
     }
     string input = parser.get<std::string>("@input");
 
     if (input.empty())
     {
         help();
-        return 0;
+        return;
     }
 
     Json::Value root;
@@ -59,6 +66,27 @@ int main(int argc, char** argv)
       thread t1(processVideoFile, filename);
       t1.join();
     }
+}
+
+void unmaskedROIDetectionTest(int argc, char** argv)
+{
+    cout << "unmaskedROIDetectionTest..." << endl;
+
+    string inJson = "resources/rois.json";
+    cout << "Input: " << inJson << endl;
+    ifstream jsonFile( inJson );
+    std::stringstream buffer;
+    buffer << jsonFile.rdbuf();
+
+    int detected = processDetectROIMask(800, 600, buffer.str(), "resources/mask1.png");
+    cout << "Rois detected: " << detected << endl;
+}
+
+int main(int argc, char** argv)
+{
+    // downSampleTest(argc, argv);
+
+    unmaskedROIDetectionTest(argc, argv);
 
     exit(0);
 }

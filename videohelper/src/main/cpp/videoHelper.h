@@ -13,6 +13,8 @@ public:
         ~VideoHelper() {};
 
         int downSample(string src, string dest, int rate);
+
+        int detectUnmaskedROIs(int frameWidth, int frameHeight, string roiJson, string maskFile);
 };
 
 #endif
