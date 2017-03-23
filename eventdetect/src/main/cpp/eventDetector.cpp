@@ -14,6 +14,7 @@
 #include <string>
 #include <algorithm>
 
+#define ED_VERSION "v1.0.0"
 
 //#define DEBUG
 //#define DEBUG_BACKGROUND
@@ -224,6 +225,11 @@ int processFrames( std::vector<Mat> &frames, int initialFrameRate, string identi
   return countFramesWithBboxes;
 
 }
+
+string ED::version() {
+    return ED_VERSION;
+}
+
 
 int ED::detectEvent( std::vector<Mat> &frames, string identifier, bool saveOutput){
   return processFrames(frames, 5, identifier, saveOutput);

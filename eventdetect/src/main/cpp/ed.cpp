@@ -45,8 +45,16 @@ void processVideoFileWithMask(string filename, string maskfilename, string ident
   ed.detectFromFileWithMask(filename, maskfilename, identifier, saveOutput);
 }
 
+void processVersion()
+{
+  ED ed;
+  cout << "EventDetector Version: " << ed.version() << endl;
+}
+
+
 int main(int argc, char** argv)
 {
+    processVersion();
 
     // Parse command line arguments
     CommandLineParser parser(argc, argv, "{help h||}{@arg1||}{@arg2||}");
