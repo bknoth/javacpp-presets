@@ -10,6 +10,7 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <set>
 #include "json/json.h"
 
 //#define DEBUG
@@ -70,13 +71,17 @@ int VideoHelper::downSample(string src, string dest, int rate) {
   }
 }
 
-int VideoHelper::detectUnmaskedROIs(int frameWidth, int frameHeight, string roiJson, string maskFile)
+string VideoHelper::detectUnmaskedROIs(int frameWidth, int frameHeight, string roiJson, string maskFile)
 
 {
+    // This can be increased for debugging/visualization. Increasing this value has an inverse affect
+    // on the number of ROI's that ca be uniquely identified on the canvas
+    int intensityFactor = 1;
+
     Mat mask = imread(maskFile, 0);
     if (!mask.data) {
         cout << "ERROR: Bad mask [" << maskFile << "]" << endl;
-        return -1;
+        return "";
     }
     else {
         // Need to invert the mask
@@ -95,7 +100,7 @@ int VideoHelper::detectUnmaskedROIs(int frameWidth, int frameHeight, string roiJ
     Mat properMask;
     resize(mask, properMask, roiCanvas.size());
 
-    // Draw all the rois on the black canvas as filled, white regions
+    // Draw all the rois on the black canvas as filled regions with a scalar value according to its intensity
     Json::Value root;
     std::istringstream iss (roiJson);
     iss >> root;
@@ -113,7 +118,7 @@ int VideoHelper::detectUnmaskedROIs(int frameWidth, int frameHeight, string roiJ
        rectangle( roiCanvas,
            Point( x * frameWidth, y * frameHeight ),
            Point( (x + w) * frameWidth, (y + h) * frameHeight),
-           Scalar( 255, 255, 255 ),
+           Scalar( (index + 1) * intensityFactor),
            CV_FILLED );
     }
 
@@ -130,12 +135,28 @@ int VideoHelper::detectUnmaskedROIs(int frameWidth, int frameHeight, string roiJ
     // If so, then it means part or all of the roi is within the unmasked region(s). Since we don't care
     // right now about which or how many rois are visible in the unmasked regions, we will stop as soon
     // as we find any pixel that is white
+    set<int> roiSet;
     for( int y = 0; y < maskedCanvas.rows; y++ ) {
       for( int x = 0; x < maskedCanvas.cols; x++ ) {
-        if (maskedCanvas.at<uchar>(y,x) != 0) return 1;
+        int pixelValue = (int)(maskedCanvas.at<uchar>(y,x));
+        if (pixelValue > 0) roiSet.insert(pixelValue - 1); // Adjust for the increment for when added
       }
     }
 
-    return 0;
+    string arrayStr = "";
+    for (set<int>::iterator it=roiSet.begin(); it!=roiSet.end(); ++it) {
+            if (arrayStr.length() > 0) arrayStr += ",";
+            arrayStr += to_string(*it);
+    }
+
+#ifdef DEBUG
+    cout << "Final ROI Set: [" << arrayStr << "]" << endl;
+#endif // DEBUG
+
+    // Return a JSON array string
+    string finalResultJson = "{\"rois\":[" + arrayStr + "]}";
+//  cout << "Final: " << finalResultJson << endl;
+
+    return finalResultJson;
 }
 

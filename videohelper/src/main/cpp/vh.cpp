@@ -31,7 +31,15 @@ int processDetectROIMask(int w, int h, string roiJson, string maskFilename)
 {
   cout << "processDetectROIMask : " << maskFilename << endl;
   VideoHelper vh;
-  return vh.detectUnmaskedROIs(w, h, roiJson, maskFilename);
+  string jsonResult = vh.detectUnmaskedROIs(w, h, roiJson, maskFilename);
+  if (jsonResult.length() > 0) {
+   Json::Value root;
+    std::istringstream iss (jsonResult);
+    iss >> root;
+    Json::Value rois = root["rois"];
+    return rois.size();
+  }
+  else return 0;
 }
 
 void downSampleTest(int argc, char** argv)
@@ -78,7 +86,7 @@ void unmaskedROIDetectionTest(int argc, char** argv)
     std::stringstream buffer;
     buffer << jsonFile.rdbuf();
 
-    int detected = processDetectROIMask(800, 600, buffer.str(), "resources/mask1.png");
+    int detected = processDetectROIMask(800, 600, buffer.str(), "resources/mask-complex.png");
     cout << "Rois detected: " << detected << endl;
 }
 

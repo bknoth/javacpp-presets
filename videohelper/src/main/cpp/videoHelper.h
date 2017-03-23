@@ -14,7 +14,7 @@ public:
 
         int downSample(string src, string dest, int rate);
 
-        int detectUnmaskedROIs(int frameWidth, int frameHeight, string roiJson, string maskFile);
+        string detectUnmaskedROIs(int frameWidth, int frameHeight, string roiJson, string maskFile);
 };
 
 #endif
