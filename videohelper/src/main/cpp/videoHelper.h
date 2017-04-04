@@ -14,6 +14,8 @@ public:
 
         int downSample(string src, string dest, int rate);
 
+        int extractFrame(string srcVid, string destImg, int frame);
+
         string detectUnmaskedROIs(int frameWidth, int frameHeight, string roiJson, string maskFile);
 };
 

@@ -27,6 +27,13 @@ void processVideoFile(string filename)
   vh.downSample(filename, "out.mp4", 5);
 }
 
+int processExtract(string video, string img, int fn)
+{
+  cout << "Extracting : " << video << endl;
+  VideoHelper vh;
+  return vh.extractFrame(video, img, fn);
+}
+
 int processDetectROIMask(int w, int h, string roiJson, string maskFilename)
 {
   cout << "processDetectROIMask : " << maskFilename << endl;
@@ -76,6 +83,12 @@ void downSampleTest(int argc, char** argv)
     }
 }
 
+void extractTest(int argc, char** argv)
+{
+    int extract = processExtract("resources/vid.avi", "resources/extract.jpg", 24);
+    cout << "Extracted : " << extract << endl;
+}
+
 void unmaskedROIDetectionTest(int argc, char** argv)
 {
     cout << "unmaskedROIDetectionTest..." << endl;
@@ -94,7 +107,9 @@ int main(int argc, char** argv)
 {
     // downSampleTest(argc, argv);
 
-    unmaskedROIDetectionTest(argc, argv);
+    // unmaskedROIDetectionTest(argc, argv);
+
+    extractTest(argc,argv);
 
     exit(0);
 }

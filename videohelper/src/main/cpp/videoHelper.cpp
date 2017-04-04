@@ -18,6 +18,40 @@
 using namespace std;
 using namespace cv;
 
+int VideoHelper::extractFrame(string srcVid, string destImg, int frameNum) {
+  VideoCapture cap(srcVid);
+  Mat frame;
+
+  int srcRate = (int) cap.get(CV_CAP_PROP_FPS);
+
+  if (srcRate <= 0 && frameNum > 0) {
+    cout << "ERROR: Can't process source as video" << endl;
+    return 0;
+  }
+
+  cout << "Extracting frame num: " << frameNum << endl;
+
+  int frameCount = 0;
+  bool found = false;
+  while(!found)
+  {
+    frameCount++;
+#ifdef DEBUG
+    cout << "frame num: " << frameCount << endl;
+#endif // DEBUG
+    cap >> frame;
+    if (frame.empty()) break;
+    if (frameCount == frameNum) found = true;
+  }
+
+  if (found) {
+    imwrite(destImg, frame);
+    return 1;
+  }
+  else return 0;
+}
+
+
 int VideoHelper::downSample(string src, string dest, int rate) {
   VideoCapture cap(src);
   std::vector<Mat> frames;
