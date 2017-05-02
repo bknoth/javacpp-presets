@@ -60,6 +60,7 @@
     <module>tensorflow</module>
     <module>eventdetect</module>
     <module>videohelper</module>
+    <module>idscameracapture</module>
   </modules>
 
   <prerequisites>
