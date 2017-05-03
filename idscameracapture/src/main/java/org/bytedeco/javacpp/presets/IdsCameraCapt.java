@@ -4,7 +4,11 @@ import org.bytedeco.javacpp.annotation.*;
 import org.bytedeco.javacpp.tools.*;
 
 @Properties(target="org.bytedeco.javacpp.idscameracapture", value={
-    @Platform(value="linux", include="idsCameraCapture.h", link="idsCameraCapture", includepath = "/usr/local/include/idscameracapture/" )
+    @Platform(value="linux",
+              include="idsCameraCapture.h",
+              link={"ids","ueye_api"},
+              includepath = "/usr/local/include/idscameracapture/",
+              linkpath = {"/usr/local/lib/idscameracapture/","/usr/lib/"} )
 }, inherit = opencv_imgproc.class)
 public class IdsCameraCapt implements InfoMapper {
     public void map(InfoMap infoMap) {

@@ -47,6 +47,8 @@ int  IdsCameraCapt::Init(int camID, char * iniFilePath)
 	int nRet = 0;
 	if (IS_SUCCESS != (nRet = is_CaptureVideo(hCam, IS_WAIT))) {
 		return 0;
+	} else {
+        std::cout << "IdsCameraCapt::Init - Camera Capture Video OK!" << std::endl;
 	}
 
 	std::cout << "IdsCameraCapt::Init - Camera is in FreeRun mode - capture ON" << std::endl;
@@ -57,7 +59,7 @@ int  IdsCameraCapt::Init(int camID, char * iniFilePath)
 IplImage* IdsCameraCapt::GetFrameImage()
 {
        int nRet = 0;
- 
+
        // Throws exception if enabled
        if (pImg != 0) cvReleaseImage(&pImg);
 
@@ -79,7 +81,9 @@ cv::Mat* IdsCameraCapt::GetFrameImageMat()
 
 	// Grab frame from camera
 	void *pMemVoid; //pointer to where the image is stored
-	is_GetImageMem(hCam, &pMemVoid);
+	if (IS_SUCCESS != (nRet = is_GetImageMem(hCam, &pMemVoid))) {
+		std::cout << "IdsCameraCapt::GetFrameImageMat - ERROR [" << nRet << "]" << std::endl;
+	}
 
 	int imgSizeBytes = nSizeW * nSizeH * (nBitsPerPixel / 8);
 	memcpy(retImg -> data, pMemVoid, imgSizeBytes);
