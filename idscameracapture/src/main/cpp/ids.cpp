@@ -7,7 +7,7 @@
 
 int main() {
 
-	int camId = 1;
+	int camId = 0;
 	char * camIniFilePath = "camConfig.ini";
 
 	IdsCameraCapt cam;
