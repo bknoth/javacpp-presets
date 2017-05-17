@@ -24,25 +24,25 @@
 
 static void help()
 {
-    cout << "Usage : " << endl << "./tracker videoFilename" << endl;
+    cout << "Usage : " << endl << "./ed videoFilename [maskFileName]" << endl;
 }
 
-void processVideoFileNoSaveOutput(string filename)
+void processVideoFileNoSaveOutput(string filename, string edMaskFile)
 {
   ED ed;
-  ed.detectFromFile(filename, "", false);
+  ed.detectFromFile(filename, "", false, edMaskFile);
 }
 
-void processVideoFile(string filename, string identifier, bool saveOutput)
+void processVideoFile(string filename, string identifier, bool saveOutput, string edMaskFile)
 {
   ED ed;
-  ed.detectFromFile(filename, identifier, saveOutput);
+  ed.detectFromFile(filename, identifier, saveOutput, edMaskFile);
 }
 
-void processVideoFileWithMask(string filename, string maskfilename, string identifier, bool saveOutput)
+void processVideoFileWithMask(string filename, string maskfilename, string identifier, bool saveOutput, string edMaskFile)
 {
   ED ed;
-  ed.detectFromFileWithMask(filename, maskfilename, identifier, saveOutput);
+  ed.detectFromFileWithMask(filename, maskfilename, identifier, saveOutput, edMaskFile);
 }
 
 void processVersion()
@@ -65,6 +65,7 @@ int main(int argc, char** argv)
     }
     string input = parser.get<std::string>(0);
     string mask = parser.get<std::string>(1);
+    string edMaskFile = "debug/ed-mask-gen.png";
 
     if (input.empty())
     {
@@ -76,37 +77,23 @@ int main(int argc, char** argv)
     if (testMultiThread) {
       int numT = 100;
       while (numT > 0) {
-       thread t1(processVideoFileNoSaveOutput, input);
-       thread t2(processVideoFileNoSaveOutput, input);
-       thread t3(processVideoFileNoSaveOutput, input);
-       thread t4(processVideoFileNoSaveOutput, input);
-       thread t5(processVideoFileNoSaveOutput, input);
-       thread t6(processVideoFileNoSaveOutput, input);
-       thread t7(processVideoFileNoSaveOutput, input);
-       thread t8(processVideoFileNoSaveOutput, input);
-       thread t9(processVideoFileNoSaveOutput, input);
-       thread t10(processVideoFileNoSaveOutput, input);
+       thread t1(processVideoFileNoSaveOutput, input, edMaskFile);
+       thread t2(processVideoFileNoSaveOutput, input, edMaskFile);
+       thread t3(processVideoFileNoSaveOutput, input, edMaskFile);
 
        t1.join();
        t2.join();
        t3.join();
-       t4.join();
-       t5.join();
-       t6.join();
-       t7.join();
-       t8.join();
-       t9.join();
-       t10.join();
 
        numT--;
       }
     }
     else {
       if (mask.empty()) {
-         processVideoFile(input, "direct", true);
+         processVideoFile(input, "direct", true, edMaskFile);
       }
       else {
-         processVideoFileWithMask(input,mask,"direct", true);
+         processVideoFileWithMask(input,mask,"direct", true, edMaskFile);
       }
     }
 

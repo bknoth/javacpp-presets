@@ -13,6 +13,8 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <ctime>
+#include <chrono>
 
 #define ED_VERSION "v1.0.0"
 
@@ -30,7 +32,7 @@
 #define BACKGROUND_SUBTRACTOR_THRESHOLD 50
 
 // If these many frames have motion terminate
-#define TERMINATION_THRESHOLD 5
+#define TERMINATION_THRESHOLD MAX_FRAMES
 
 
 using namespace std;
@@ -94,14 +96,16 @@ static void getBoundingBoxes(const Mat& img, Mat& mask, std::vector<cv::Rect> &b
 
 }
 
-int processFrames( std::vector<Mat> &frames, int initialFrameRate, string identifier, bool saveOutput)
+int processFrames( std::vector<Mat> &frames, int initialFrameRate, string identifier, bool saveOutput, string edMaskFile)
 {
+  auto start = std::chrono::steady_clock::now();
   int countFramesWithBboxes = 0;
   bool updateBackgroundModel = true;
+  int blobs = 0;
 
   // Find frames per second.
   double fps = 15;
-  Mat frame, bgMask, outFrame;
+  Mat frame, bgMask, outFrame, edMask;
 
   // Make sure
   if(frames.empty())
@@ -141,7 +145,6 @@ int processFrames( std::vector<Mat> &frames, int initialFrameRate, string identi
     imwrite("./debug/ed-" + identifier + "-bg.jpg", bkgnd);
   }
 
-
   VideoWriter vidOut;
   if (saveOutput) {
      vidOut = VideoWriter("./debug/ed-" + identifier + ".mp4", VideoWriter::fourcc('X','2','6','4'), initialFrameRate, frame.size(), true);
@@ -150,6 +153,10 @@ int processFrames( std::vector<Mat> &frames, int initialFrameRate, string identi
        return 0;
      }
   }
+
+  // Create a black mask canvas
+  edMask = Mat(frame.size(), CV_8UC4);
+  edMask = cv::Scalar(0,0,0,255);
 
   // Vector of motion bounding boxes
   std::vector<cv::Rect> bboxes;
@@ -168,6 +175,7 @@ int processFrames( std::vector<Mat> &frames, int initialFrameRate, string identi
 
       if (bboxes.size() > 0){
           countFramesWithBboxes += 1;
+          blobs += bboxes.size();
 #ifdef DEBUG
           cout << "Frame: " << curFrame << " No. of objects detected: " << bboxes.size() << endl;
           for(int j = 0; j < bboxes.size(); j++)
@@ -177,10 +185,10 @@ int processFrames( std::vector<Mat> &frames, int initialFrameRate, string identi
 #endif /* DEBUG */
       }
 
-      if ( TERMINATION_THRESHOLD > 0 && countFramesWithBboxes >= TERMINATION_THRESHOLD)
+      // Apply every "blob"/roi to the edMask as transparent
+      for (int j = 0; j < bboxes.size(); j++)
       {
-        cout << "Total frames: " << frames.size() << endl << "TERMINATION_THRESHOLD reached : " << countFramesWithBboxes << endl;
-        return TERMINATION_THRESHOLD;
+        rectangle( edMask, bboxes[j].tl(), bboxes[j].br(), Scalar(255,255,255,0), CV_FILLED );
       }
 
       if (saveOutput) {
@@ -191,6 +199,17 @@ int processFrames( std::vector<Mat> &frames, int initialFrameRate, string identi
               rectangle( outFrame, bboxes[j].tl(), bboxes[j].br(), Scalar(255,255,255), 2, 8, 0 );
           }
           vidOut << outFrame;
+      }
+
+      if ( TERMINATION_THRESHOLD > 0 && countFramesWithBboxes >= TERMINATION_THRESHOLD)
+      {
+  	if (!edMaskFile.empty()) imwrite(edMaskFile, edMask);
+        cout << "Total frames: " << frames.size() << endl << "TERMINATION_THRESHOLD reached : " << countFramesWithBboxes << endl;
+        auto end = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        cout << "It took " << elapsed.count() << " milliseconds." << endl;
+        cout << "Total blobs found: " << blobs << endl;
+        return TERMINATION_THRESHOLD;
       }
 
 #ifdef DEBUG
@@ -222,6 +241,13 @@ int processFrames( std::vector<Mat> &frames, int initialFrameRate, string identi
     vidOut.release();
   }
 
+  if (!edMaskFile.empty()) imwrite(edMaskFile, edMask);
+
+  auto end = std::chrono::steady_clock::now();
+  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  cout << "It took " << elapsed.count() << " milliseconds." << endl;
+  cout << "Total blobs found: " << blobs << endl;
+
   return countFramesWithBboxes;
 
 }
@@ -231,11 +257,11 @@ string ED::version() {
 }
 
 
-int ED::detectEvent( std::vector<Mat> &frames, string identifier, bool saveOutput){
-  return processFrames(frames, 5, identifier, saveOutput);
+int ED::detectEvent( std::vector<Mat> &frames, string identifier, bool saveOutput, string edMaskFile){
+  return processFrames(frames, 5, identifier, saveOutput, edMaskFile);
 }
 
-int ED::detectFromFile(string filename, string identifier, bool saveOutput){
+int ED::detectFromFile(string filename, string identifier, bool saveOutput, string edMaskFile){
   cout << "Detecting events from file: [" << filename << "]" << endl;
   VideoCapture cap(filename);
   std::vector<Mat> frames;
@@ -249,10 +275,10 @@ int ED::detectFromFile(string filename, string identifier, bool saveOutput){
     numFrames++;
     if (numFrames == MAX_FRAMES) break;
   }
-  return processFrames(frames,(int) cap.get(CV_CAP_PROP_FPS), identifier, saveOutput);
+  return processFrames(frames,(int) cap.get(CV_CAP_PROP_FPS), identifier, saveOutput, edMaskFile);
 }
 
-int ED::detectFromFileWithMask(string filename, string maskfilename, string identifier, bool saveOutput) {
+int ED::detectFromFileWithMask(string filename, string maskfilename, string identifier, bool saveOutput, string edMaskFile) {
   cout << "Detecting events from file: [" << filename << "] with mask [" << maskfilename << "]" << endl;
 
   Mat mask = imread(maskfilename, 0);
@@ -291,6 +317,6 @@ int ED::detectFromFileWithMask(string filename, string maskfilename, string iden
     if (numFrames == MAX_FRAMES) break;
   }
 
-  return processFrames(frames,(int) cap.get(CV_CAP_PROP_FPS), identifier, saveOutput);
+  return processFrames(frames,(int) cap.get(CV_CAP_PROP_FPS), identifier, saveOutput, edMaskFile);
 }
 

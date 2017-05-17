@@ -34,11 +34,13 @@ public static class ED extends Pointer {
         public ED() { super((Pointer)null); allocate(); }
         private native void allocate();
 
-	public native int detectEvent( @ByRef MatVector frames);
-        public native int detectFromFile(@StdString BytePointer filename);
-        public native int detectFromFile(@StdString String filename);
-        public native int detectFromFileWithMask(@StdString BytePointer filename, @StdString BytePointer maskfilename);
-        public native int detectFromFileWithMask(@StdString String filename, @StdString String maskfilename);
+        public native @StdString BytePointer version();
+        public native int detectEvent( @ByRef MatVector frames, @StdString BytePointer identifier, @Cast("bool") boolean saveOutput);
+        public native int detectEvent( @ByRef MatVector frames, @StdString String identifier, @Cast("bool") boolean saveOutput);
+        public native int detectFromFile(@StdString BytePointer filename, @StdString BytePointer identifier, @Cast("bool") boolean saveOutput);
+        public native int detectFromFile(@StdString String filename, @StdString String identifier, @Cast("bool") boolean saveOutput);
+        public native int detectFromFileWithMask(@StdString BytePointer filename, @StdString BytePointer maskfilename, @StdString BytePointer identifier, @Cast("bool") boolean saveOutput);
+        public native int detectFromFileWithMask(@StdString String filename, @StdString String maskfilename, @StdString String identifier, @Cast("bool") boolean saveOutput);
 }
 
 // #endif

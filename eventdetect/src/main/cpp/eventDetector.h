@@ -13,9 +13,9 @@ public:
         ~ED() {};
 
         string version();
-        int detectEvent( std::vector<Mat> &frames, string identifier, bool saveOutput);
-        int detectFromFile(string filename, string identifier, bool saveOutput);
-        int detectFromFileWithMask(string filename, string maskfilename, string identifier, bool saveOutput);
+        int detectEvent( std::vector<Mat> &frames, string identifier, bool saveOutput, string edMaskFile);
+        int detectFromFile(string filename, string identifier, bool saveOutput, string edMaskFile);
+        int detectFromFileWithMask(string filename, string maskfilename, string identifier, bool saveOutput, string edMaskFile);
 };
 
 #endif
