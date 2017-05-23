@@ -105,6 +105,18 @@ int VideoHelper::downSample(string src, string dest, int rate) {
   }
 }
 
+string VideoHelper::sizeVideo(string vidFile)
+{
+   VideoCapture cap(vidFile);
+   return "{\"width\":" + to_string((int) cap.get(CV_CAP_PROP_FRAME_WIDTH)) + ", \"height\":" + to_string((int) cap.get(CV_CAP_PROP_FRAME_HEIGHT)) + "}";
+}
+
+string VideoHelper::sizeImage(string imgFile)
+{
+   Mat mask = imread(imgFile, 0);
+   return "{\"width\":" + to_string((int) mask.size().width) + ", \"height\":" + to_string((int)mask.size().height) + "}";
+}
+
 string VideoHelper::detectUnmaskedROIs(int frameWidth, int frameHeight, string roiJson, string maskFile)
 
 {

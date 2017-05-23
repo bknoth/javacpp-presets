@@ -17,6 +17,10 @@ public:
         int extractFrame(string srcVid, string destImg, int frame);
 
         string detectUnmaskedROIs(int frameWidth, int frameHeight, string roiJson, string maskFile);
+
+        string sizeVideo(string vidFile);
+
+        string sizeImage(string imgFile);
 };
 
 #endif

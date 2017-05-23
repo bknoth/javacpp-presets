@@ -34,6 +34,18 @@ int processExtract(string video, string img, int fn)
   return vh.extractFrame(video, img, fn);
 }
 
+string processVideoSize(string video)
+{
+  VideoHelper vh;
+  return vh.sizeVideo(video);
+}
+
+string processImageSize(string img)
+{
+  VideoHelper vh;
+  return vh.sizeImage(img);
+}
+
 int processDetectROIMask(int w, int h, string roiJson, string maskFilename)
 {
   cout << "processDetectROIMask : " << maskFilename << endl;
@@ -109,7 +121,10 @@ int main(int argc, char** argv)
 
     // unmaskedROIDetectionTest(argc, argv);
 
-    extractTest(argc,argv);
+    // extractTest(argc,argv);
+
+    cout << "Video size: " << processVideoSize("resources/vid.avi") << endl;
+    cout << "Image size: " << processImageSize("resources/mask1.png") << endl;
 
     exit(0);
 }
