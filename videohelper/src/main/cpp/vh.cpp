@@ -111,7 +111,8 @@ void unmaskedROIDetectionTest(int argc, char** argv)
     std::stringstream buffer;
     buffer << jsonFile.rdbuf();
 
-    int detected = processDetectROIMask(800, 600, buffer.str(), "resources/mask-complex.png");
+    int detected = processDetectROIMask(800, 600, buffer.str(), "resources/precheck6335675121596400997combined.png");
+//    int detected = processDetectROIMask(800, 600, buffer.str(), "resources/mask-complex.png");
     cout << "Rois detected: " << detected << endl;
 }
 
@@ -119,12 +120,13 @@ int main(int argc, char** argv)
 {
     // downSampleTest(argc, argv);
 
-    // unmaskedROIDetectionTest(argc, argv);
+    unmaskedROIDetectionTest(argc, argv);
 
     // extractTest(argc,argv);
 
-    cout << "Video size: " << processVideoSize("resources/vid.avi") << endl;
-    cout << "Image size: " << processImageSize("resources/mask1.png") << endl;
+    //cout << "Video size: " << processVideoSize("resources/vid.avi") << endl;
+    //cout << "Video size: " << processVideoSize("resources/imghelper8446270497878802808.mp4") << endl;
+    //cout << "Image size: " << processImageSize("resources/mask1.png") << endl;
 
     exit(0);
 }

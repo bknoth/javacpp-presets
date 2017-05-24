@@ -122,9 +122,9 @@ string VideoHelper::detectUnmaskedROIs(int frameWidth, int frameHeight, string r
 {
     // This can be increased for debugging/visualization. Increasing this value has an inverse affect
     // on the number of ROI's that ca be uniquely identified on the canvas
-    int intensityFactor = 1;
+    int intensityFactor = 255;
 
-    Mat mask = imread(maskFile, 0);
+    Mat mask = imread(maskFile, -1);
     if (!mask.data) {
         cout << "ERROR: Bad mask [" << maskFile << "]" << endl;
         return "";
@@ -133,43 +133,70 @@ string VideoHelper::detectUnmaskedROIs(int frameWidth, int frameHeight, string r
         // Need to invert the mask
         for( int y = 0; y < mask.rows; y++ ) {
           for( int x = 0; x < mask.cols; x++ ) {
-            if (mask.at<uchar>(y,x) == 0) mask.at<uchar>(y,x) = 1; else mask.at<uchar>(y,x) = 0;
+              if (mask.at<uint>(y,x) == 0) mask.at<uint>(y,x) = 1; else mask.at<uint>(y,x) = 0;
           }
         }
     }
 
-    // Create a black roi canvas
-    Mat roiCanvas = Mat(frameHeight, frameWidth, CV_8U);
-    roiCanvas = cv::Scalar(0);
+#ifdef DEBUG
+      // Create a white roi canvas
+      Mat whiteCanvas = Mat(frameHeight, frameWidth, CV_8UC4);
+      whiteCanvas = cv::Scalar(255);
 
-    // Here we make sure the mask is the same size as the roi canvas
-    Mat properMask;
-    resize(mask, properMask, roiCanvas.size());
+      // Here we make sure the mask is the same size as the roi canvas
+      Mat sampleMask;
+      resize(mask, sampleMask, whiteCanvas.size());
 
-    // Draw all the rois on the black canvas as filled regions with a scalar value according to its intensity
+      // Now apply the mask to the canvas
+      Mat sampleMaskedCanvas;
+      whiteCanvas.copyTo(sampleMaskedCanvas,sampleMask);
+      imshow("Default Mask", sampleMaskedCanvas);
+
+      cout << "detectUnmaskedROIs: Size [" << frameWidth << " x " << frameHeight << "]" << endl;
+#endif // DEBUG
+
+    // This will be the final detected set of rois (indexes)
+    set<int> roiSet;
+
     Json::Value root;
     std::istringstream iss (roiJson);
     iss >> root;
 
+    // Draw each roi on a black canvas and then mask over it
     for ( int index = 0; index < root.size(); ++index ) {
+
+#ifdef DEBUG
+      cout << "detectUnmaskedROIs: Evaluating ROI [" << index << "]" << endl;
+#endif
+
+      // Create a black roi canvas
+      Mat roiCanvas = Mat(frameHeight, frameWidth, CV_8UC4);
+      roiCanvas = cv::Scalar(0);
+
+      // Here we make sure the mask is the same size as the roi canvas
+      Mat properMask;
+      resize(mask, properMask, roiCanvas.size());
+
       Json::Value roi = root[index];
       double x = roi.get("x",0.0).asDouble();
       double y = roi.get("y",0.0).asDouble();
       double w = roi.get("w",0.0).asDouble();
       double h = roi.get("h",0.0).asDouble();
+
+      int roiX = x * frameWidth;
+      int roiY = y * frameHeight;
+      int roiW = (x + w) * frameWidth;
+      int roiH = (y + h) * frameHeight;
+
 #ifdef DEBUG
-      std:cout << "ROI: " << roi << endl;
+      cout << "ROI: " << roi << endl;
+      cout << "ROI (denormalized): [" << roiX << "," << roiY << "," << roiW << "," << roiH << "]" << endl;
 #endif // DEBUG
 
-       rectangle( roiCanvas,
-           Point( x * frameWidth, y * frameHeight ),
-           Point( (x + w) * frameWidth, (y + h) * frameHeight),
-           Scalar( (index + 1) * intensityFactor),
-           CV_FILLED );
-    }
+      rectangle( roiCanvas, Point( roiX, roiY ), Point( roiW, roiH), Scalar( intensityFactor), CV_FILLED );
 
-    Mat maskedCanvas;
-    roiCanvas.copyTo(maskedCanvas,properMask);
+      Mat maskedCanvas;
+      roiCanvas.copyTo(maskedCanvas,properMask);
 
 #ifdef DEBUG
       imshow("roiCanvas", roiCanvas);
@@ -177,16 +204,22 @@ string VideoHelper::detectUnmaskedROIs(int frameWidth, int frameHeight, string r
       int keycode = waitKey(0);
 #endif // DEBUG
 
-    // Now, we finally run a scan over the maskedCanvas to find out if we "see" any white from the rois.
-    // If so, then it means part or all of the roi is within the unmasked region(s). Since we don't care
-    // right now about which or how many rois are visible in the unmasked regions, we will stop as soon
-    // as we find any pixel that is white
-    set<int> roiSet;
-    for( int y = 0; y < maskedCanvas.rows; y++ ) {
-      for( int x = 0; x < maskedCanvas.cols; x++ ) {
-        int pixelValue = (int)(maskedCanvas.at<uchar>(y,x));
-        if (pixelValue > 0) roiSet.insert(pixelValue - 1); // Adjust for the increment for when added
+      // Now, we finally run a scan over the roi on maskedCanvas to find out if we "see" any white from the roi.
+      bool found = false;
+      for( int innery = roiY; !found && (innery < (roiY + (roiH-roiY))); innery++ ) {
+        for( int innerx = roiX; !found && (innerx < (roiX + (roiW-roiX))); innerx++ ) {
+          uint pixelValue = (uint)(maskedCanvas.at<uint>(innery,innerx));
+          if (pixelValue > 0) {
+            found = true;
+            roiSet.insert(index);
+          }
+        }
       }
+
+#ifdef DEBUG
+      if (found) cout << "detectUnmaskedROIs: *YES* ROI [" << index << "]" << endl;
+      else cout << "detectUnmaskedROIs: *NO* ROI [" << index << "]" << endl;
+#endif
     }
 
     string arrayStr = "";
@@ -200,9 +233,6 @@ string VideoHelper::detectUnmaskedROIs(int frameWidth, int frameHeight, string r
 #endif // DEBUG
 
     // Return a JSON array string
-    string finalResultJson = "{\"rois\":[" + arrayStr + "]}";
-//  cout << "Final: " << finalResultJson << endl;
-
-    return finalResultJson;
+    return "{\"rois\":[" + arrayStr + "]}";
 }
 
